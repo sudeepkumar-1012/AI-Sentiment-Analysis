@@ -1,0 +1,132 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Analysis Results - Sentiment-Based Review Analysis and Product Recommendation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4 text-center">
+        <h1 class="display-6 fw-bold">Analysis Results</h1>
+        <p class="text-muted">Review sentiment summary and detail view.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="fw-bold text-success">{{ summary.positive_percentage }}%</h3>
+                    <p class="mb-0">Positive Reviews</p>
+                    <small class="text-muted">{{ summary.positive_count }} reviews</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="fw-bold text-danger">{{ summary.negative_percentage }}%</h3>
+                    <p class="mb-0">Negative Reviews</p>
+                    <small class="text-muted">{{ summary.negative_count }} reviews</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="fw-bold text-secondary">{{ summary.neutral_percentage }}%</h3>
+                    <p class="mb-0">Neutral Reviews</p>
+                    <small class="text-muted">{{ summary.neutral_count }} reviews</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="fw-bold text-info">{{ total_reviews }}</h3>
+                    <p class="mb-0">Total Reviews</p>
+                    <small class="text-muted">Analyzed</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Sentiment Distribution</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if sentiment_chart %}
+                        <img src="{{ sentiment_chart }}" class="img-fluid" alt="Sentiment chart">
+                    {% else %}
+                        <p class="text-muted">Chart unavailable.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% if product_chart %}
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Product Sentiment</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ product_chart }}" class="img-fluid" alt="Product sentiment chart">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if recommendations and recommendations.recommendations %}
+    <div class="mb-5">
+        <h3 class="h5 mb-3">Top Product Recommendations</h3>
+        <div class="row g-3">
+            {% for product in recommendations.recommendations %}
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ loop.index }}. {{ product.product }}</h5>
+                        <p class="mb-1">Average score: <strong>{{ product.average_score }}</strong></p>
+                        <p class="mb-0">Positive reviews: {{ product.positive_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mb-4">
+        <h3 class="h5 mb-3">Review Details</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Original Review</th>
+                        <th>Cleaned Text</th>
+                        <th>Sentiment</th>
+                        <th>Compound Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in reviews %}
+                    <tr>
+                        <td>{{ review.index }}</td>
+                        <td>{{ review.original_text }}</td>
+                        <td>{{ review.preprocessed_text }}</td>
+                        <td class="text-capitalize">{{ review.label }}</td>
+                        <td>{{ review.sentiment.compound }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Analyze More Reviews</a>
+        <span class="text-muted">RoBERTa enabled: {{ 'Yes' if use_roberta else 'No' }}</span>
+    </div>
+</div>
+{% endblock %}

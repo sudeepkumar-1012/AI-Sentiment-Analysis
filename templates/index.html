@@ -1,0 +1,399 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Sentiment-Based Review Analysis and Product Recommendation{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient py-5 text-center text-white">
+    <div class="container-lg">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-3 fw-bold mb-3">
+                    <i class="fas fa-brain me-2"></i>Sentiment-Based Review Analysis and Product Recommendation
+                </h1>
+                <p class="lead mb-4 fs-5">
+                    Analyze customer reviews with AI-powered sentiment analysis and get actionable insights
+                </p>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <span class="badge bg-light text-primary fs-6 p-2">
+                        <i class="fas fa-check-circle me-1"></i> VADER Sentiment
+                    </span>
+                    <span class="badge bg-light text-primary fs-6 p-2">
+                        <i class="fas fa-cogs me-1"></i> NLP Processing
+                    </span>
+                    <span class="badge bg-light text-primary fs-6 p-2">
+                        <i class="fas fa-chart-bar me-1"></i> Visual Analytics
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upload Form Section -->
+<section class="upload-section py-5" id="upload-section">
+    <div class="container-lg">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 class="text-center fw-bold mb-4">
+                    <i class="fas fa-upload text-primary me-2"></i>Upload & Analyze Your Reviews
+                </h2>
+
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4 p-lg-5">
+                        <!-- Tab Navigation -->
+                        <ul class="nav nav-tabs mb-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-semibold" id="csv-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#csv-content" type="button" role="tab" aria-selected="true">
+                                    <i class="fas fa-file-csv me-2"></i>Upload CSV File
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-semibold" id="manual-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#manual-content" type="button" role="tab" aria-selected="false">
+                                    <i class="fas fa-keyboard me-2"></i>Manual Input
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content">
+                            <!-- CSV Upload Tab -->
+                            <div class="tab-pane fade show active" id="csv-content" role="tabpanel" aria-labelledby="csv-tab">
+                                <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <label for="file" class="form-label fw-semibold fs-5">
+                                            <i class="fas fa-table me-2 text-primary"></i>Select CSV File
+                                        </label>
+                                        <input type="file" class="form-control form-control-lg" id="file" 
+                                               name="file" accept=".csv">
+                                        <div class="form-text mt-2">
+                                            CSV should contain a <code>review</code> or <code>text</code> column. 
+                                            Optional <code>product</code> column for recommendations.
+                                        </div>
+                                    </div>
+
+                                    <!-- Advanced Options -->
+                                    <div class="card bg-light border-0 mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="fas fa-sliders-h me-2 text-secondary"></i>Advanced Options
+                                            </h6>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="useRobertaCsv" name="use_roberta">
+                                                <label class="form-check-label" for="useRobertaCsv">
+                                                    Enable RoBERTa analysis <span class="badge bg-info ms-2">Advanced</span>
+                                                </label>
+                                                <div class="form-text mt-2">
+                                                    Requires transformers library. Provides more accurate sentiment analysis but may be slower.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-play me-2"></i>Analyze Reviews
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Manual Input Tab -->
+                            <div class="tab-pane fade" id="manual-content" role="tabpanel" aria-labelledby="manual-tab">
+                                <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <label for="manual_text" class="form-label fw-semibold fs-5">
+                                            <i class="fas fa-pen me-2 text-primary"></i>Enter Reviews (One Per Line)
+                                        </label>
+                                        <textarea class="form-control form-control-lg" id="manual_text" name="manual_text" 
+                                                  rows="8" placeholder="Enter reviews separated by new lines...&#10;Example:&#10;Great product, highly recommend!&#10;Not satisfied with quality.&#10;Amazing experience!"></textarea>
+                                        <div class="form-text mt-2">
+                                            Enter one review per line. Minimum 1 review required.
+                                        </div>
+                                    </div>
+
+                                    <!-- Advanced Options -->
+                                    <div class="card bg-light border-0 mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="fas fa-sliders-h me-2 text-secondary"></i>Advanced Options
+                                            </h6>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="useRobertaManual" name="use_roberta">
+                                                <label class="form-check-label" for="useRobertaManual">
+                                                    Enable RoBERTa analysis <span class="badge bg-info ms-2">Advanced</span>
+                                                </label>
+                                                <div class="form-text mt-2">
+                                                    Provides more accurate sentiment analysis but may be slower.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-play me-2"></i>Analyze Reviews
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section py-5 bg-light">
+    <div class="container-lg">
+        <h2 class="text-center fw-bold mb-5">
+            <i class="fas fa-sparkles text-primary me-2"></i>Key Features
+        </h2>
+        
+        <div class="row g-4">
+            <!-- Feature 1: Easy Upload -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-file-upload fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">Easy Upload</h5>
+                        <p class="card-text text-muted">
+                            Upload CSV files or manually enter reviews. Supports large datasets effortlessly.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: AI Sentiment Analysis -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-brain fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">AI Sentiment Analysis</h5>
+                        <p class="card-text text-muted">
+                            VADER and optional RoBERTa for accurate sentiment classification.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: Visual Analytics -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-pie fa-3x text-info"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">Visual Analytics</h5>
+                        <p class="card-text text-muted">
+                            Beautiful charts and graphs to visualize sentiment distribution.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Smart Recommendations -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-star fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">Smart Recommendations</h5>
+                        <p class="card-text text-muted">
+                            Get product recommendations based on review sentiment scores.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 5: Text Preprocessing -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-wand-magic-sparkles fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">Text Preprocessing</h5>
+                        <p class="card-text text-muted">
+                            Automatic cleaning, tokenization, and stopword removal with NLTK.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 6: REST API -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-code fa-3x text-secondary"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">REST API</h5>
+                        <p class="card-text text-muted">
+                            Built-in API endpoint for programmatic access and integration.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section py-5 bg-white">
+    <div class="container-lg">
+        <h2 class="text-center fw-bold mb-5">
+            <i class="fas fa-cog text-primary me-2"></i>How It Works
+        </h2>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Step 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        1
+                    </div>
+                    <h5 class="fw-bold mb-2">Upload Reviews</h5>
+                    <p class="text-muted">
+                        Upload a CSV file or manually enter review text.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="col-md-6 col-lg-3 d-flex align-items-center justify-content-center d-none d-lg-flex">
+                <i class="fas fa-arrow-right fa-2x text-primary"></i>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="step-number bg-success text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        2
+                    </div>
+                    <h5 class="fw-bold mb-2">Text Preprocessing</h5>
+                    <p class="text-muted">
+                        Clean, tokenize, and remove stopwords from reviews.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="col-md-6 col-lg-3 d-flex align-items-center justify-content-center d-none d-lg-flex">
+                <i class="fas fa-arrow-right fa-2x text-success"></i>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="step-number bg-info text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        3
+                    </div>
+                    <h5 class="fw-bold mb-2">Sentiment Analysis</h5>
+                    <p class="text-muted">
+                        Analyze sentiment using VADER and optional RoBERTa.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="col-md-6 col-lg-3 d-flex align-items-center justify-content-center d-none d-lg-flex">
+                <i class="fas fa-arrow-right fa-2x text-info"></i>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="step-number bg-warning text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        4
+                    </div>
+                    <h5 class="fw-bold mb-2">View Results</h5>
+                    <p class="text-muted">
+                        Get visualizations, charts, and product recommendations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5 bg-primary text-white text-center">
+    <div class="container-lg">
+        <h2 class="fw-bold mb-3">Ready to Analyze Reviews?</h2>
+        <p class="lead mb-4">Start analyzing your customer reviews with AI-powered sentiment analysis today.</p>
+        <a href="#upload-section" class="btn btn-light btn-lg">
+            <i class="fas fa-arrow-down me-2"></i>Get Started
+        </a>
+    </div>
+</section>
+
+<style>
+    /* Hero Section Gradient */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Feature Card Hover Effect */
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Feature Icon Animation */
+    .feature-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+
+    /* Smooth Scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Button Hover Effects */
+    .btn-primary {
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    }
+
+    /* Tab Content Styling */
+    .nav-tabs .nav-link {
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-bottom-color: #667eea;
+        color: #667eea;
+    }
+
+    .nav-tabs .nav-link.active {
+        border-bottom-color: #667eea;
+        color: #667eea;
+        background-color: transparent;
+    }
+
+    /* Step Number Styling */
+    .step-number {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
